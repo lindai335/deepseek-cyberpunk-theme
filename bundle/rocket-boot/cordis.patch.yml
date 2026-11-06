@@ -1,0 +1,7 @@
+# Bundle patch for @local/rocket-boot.
+# Inserts the Host row that injects the rocket-launch transition overlay into
+# the Web GUI's index.html.
+- insert:
+    - id: rocket-boot
+      name: '@local/rocket-boot'
+      config: {}

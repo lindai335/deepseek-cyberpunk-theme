@@ -1,0 +1,23 @@
+{
+  "name": "@local/rocket-boot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Rocket launch to orbit transition animation shown between the Harness boot screen and the app UI.",
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "rocket-boot.css",
+    "rocket-boot.client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" }
+  }
+}

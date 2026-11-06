@@ -1,0 +1,270 @@
+/* ============================================================================
+   Cyberpunk theme for the DeepSeek Harness Web GUI
+   ----------------------------------------------------------------------------
+   Injected into every served index.html by the @local/cyberpunk-theme host
+   plugin through the `webserver/index-inject` hook.
+
+   Strategy
+   1. Palette layer  - override the design-system alias tokens (--dsw-alias-* /
+      --dsw-specific-*) on the body element. The app resolves every surface,
+      border and label through these aliases, so one palette re-skins the whole
+      product. `!important` is required because the ui-layout presenter writes
+      the active snapshot onto body as inline custom properties, and inline
+      declarations would otherwise win.
+   2. Canvas layer   - grid, corner glows and scanlines painted on the page
+      canvas, so the shell reads as a "tech deck" instead of a plain flat UI.
+   3. Accent layer   - focus ring, selection colour and code glow.
+
+   Colours
+     deep void   #04060d      panel   #0a0f1d      raised  #0e1526
+     neon cyan   #00e5ff      hot magenta #ff2d95    signal green #00ffa3
+     signal amber #ffc400     danger  #ff2d6f
+   ========================================================================== */
+
+/* -------------------------------------------------------------------------- */
+/* 1. Palette                                                                 */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: dark !important;
+}
+
+body {
+  /* --- surfaces ---------------------------------------------------------- */
+  --dsw-alias-bg-base: #04060d !important;
+  --dsw-alias-bg-layer-1: #0a0f1d !important;
+  --dsw-alias-bg-layer-2: #0e1526 !important;
+  --dsw-alias-bg-layer-3: #141d33 !important;
+  --dsw-alias-bg-overlay: #1b2740 !important;
+  --dsw-alias-bg-module-platform: #0b1120 !important;
+  --dsw-alias-bg-multi-select: #0b1220 !important;
+  --dsw-alias-bg-skeleton: #00e5ff14 !important;
+  --dsw-alias-bg-document-preview: #060b16 !important;
+  --dsw-alias-bg-document-selection: color-mix(in srgb, #00e5ff 35%, transparent) !important;
+  --dsw-alias-bg-mask-1: #02040a99 !important;
+  --dsw-alias-bg-mask-2: #02040a70 !important;
+  --dsw-alias-bg-mask-3: #02040ab3 !important;
+  --dsw-alias-bg-mask-photo: #02040ae6 !important;
+  --dsw-alias-bg-mask-drop: #0a1424d9 !important;
+
+  /* --- borders ----------------------------------------------------------- */
+  --dsw-alias-border-l1: #00e5ff1a !important;
+  --dsw-alias-border-l2: #00e5ff2e !important;
+  --dsw-alias-border-l2-darkmode-thin: #00e5ff1a !important;
+  --dsw-alias-border-l3: #00e5ff45 !important;
+  --dsw-alias-border-l4: #00e5ff66 !important;
+  --dsw-alias-border-inverted: #00e5ff1f !important;
+  --dsw-alias-border-inverted2: #00e5ff2e !important;
+  --dsw-elevation-stroke-color: #00e5ff3d !important;
+
+  /* --- labels ------------------------------------------------------------ */
+  --dsw-alias-label-primary: #d9f6ff !important;
+  --dsw-alias-label-primary-dimmed: #9fd3e6 !important;
+  --dsw-alias-label-primary-bluish: #bfe9ff !important;
+  --dsw-alias-label-primary-foreground: #04060d !important;
+  --dsw-alias-label-primary-inverted: #0e1526 !important;
+  --dsw-alias-label-secondary: #83b8cd !important;
+  --dsw-alias-label-tertiary: #5d8ba3 !important;
+  --dsw-alias-label-caption: #4e7a90 !important;
+  --dsw-alias-label-dimmed: #2c4a5e !important;
+  --dsw-alias-label-document-preview: #9fd8e8 !important;
+  --dsw-alias-label-shimmer: color-mix(in srgb, #00e5ff 45%, transparent) !important;
+  --dsw-alias-label-deep-diving: #4df0ff !important;
+  --dsw-alias-label-deep-diving-shimmer: #a6f7ff !important;
+
+  /* --- brand / accent ---------------------------------------------------- */
+  --dsw-alias-brand-primary: #00e5ff !important;
+  --dsw-alias-brand-primary-invert: #04060d !important;
+  --dsw-alias-brand-primary-new-colorprimary-new-color: #00e5ff !important;
+  --dsw-alias-brand-text: #00e5ff !important;
+  --dsw-alias-link: #00d9ff !important;
+  --dsw-alias-menu-icon: #9fd8e8 !important;
+  --dsw-alias-onboarding-accent: #00e5ff !important;
+  --dsw-alias-onboarding-card-fill: #0a1120e6 !important;
+  --dsw-alias-onboarding-secondary-fill: #14243f !important;
+  --dsw-alias-onboarding-checkbox-border: #00e5ff66 !important;
+  --dsw-gradient-onboarding-cyan-stops: #00e5ff, #00b8ff !important;
+  --dsw-gradient-onboarding-violet-stops: #7c4dff, #ff2d95 !important;
+  --dsw-gradient-onboarding-blue-stops: #00b8ff, #00e5ff !important;
+
+  /* --- interactive ------------------------------------------------------- */
+  --dsw-alias-interactive-bg-hover: #00e5ff1a !important;
+  --dsw-alias-interactive-bg-hover-accent: #ff2d9524 !important;
+  --dsw-alias-interactive-bg-hover-danger: #ff2d6f26 !important;
+  --dsw-alias-interactive-bg-hover-solid: #14233c !important;
+  --dsw-alias-interactive-bg-active: #00e5ff2e !important;
+
+  /* --- buttons ----------------------------------------------------------- */
+  --dsw-alias-button-primary-fill: #00e5ff !important;
+  --dsw-alias-button-primary-hover: #6bf4ff !important;
+  --dsw-alias-button-primary-dimmed: #00b8cc !important;
+  --dsw-alias-button-contrast-fill: #04060d !important;
+  --dsw-alias-button-elevated-fill: #16233c !important;
+  --dsw-alias-button-floating-fill: #0e1526 !important;
+  --dsw-alias-button-floating-hover: #16233c !important;
+  --dsw-alias-button-ghost-active-fill: #16233c !important;
+  --dsw-alias-button-ghost-active-hover: #1d2c49 !important;
+  --dsw-alias-button-ghost-active-border: #00e5ff !important;
+  --dsw-alias-button-info-fill: #00b8ff !important;
+  --dsw-alias-button-info-hover: #00e5ff !important;
+  --dsw-alias-button-tool-bar-fill: #00e5ff1a !important;
+  --dsw-alias-button-tool-bar-hover: #00e5ff2e !important;
+  --dsw-alias-button-tool-bar-fill-invisible: transparent !important;
+
+  /* --- semantic state ---------------------------------------------------- */
+  --dsw-alias-state-business-primary: #00e5ff !important;
+  --dsw-alias-state-business-tertiary: #0b2b3a !important;
+  --dsw-alias-state-idle-primary: #3f6a80 !important;
+  --dsw-alias-state-success-primary: #00ffa3 !important;
+  --dsw-alias-state-success-secondary: #5cffc2 !important;
+  --dsw-alias-state-success-tertiary: #06301f !important;
+  --dsw-alias-state-warn-primary: #ffc400 !important;
+  --dsw-alias-state-warn-secondary: #ffd966 !important;
+  --dsw-alias-state-warn-tertiary: #33260a !important;
+  --dsw-alias-state-warn-label: #ffc400 !important;
+  --dsw-alias-state-error-primary: #ff2d6f !important;
+  --dsw-alias-state-error-secondary: #ff6b9d !important;
+  --dsw-alias-state-error-tertiary: #3a0c1c !important;
+
+  /* --- markdown / code --------------------------------------------------- */
+  --dsw-alias-markdown-code-block: #060b16 !important;
+  --dsw-alias-markdown-code-block-banner: #0d1729 !important;
+  --dsw-alias-markdown-inline-code: #10203a !important;
+  --dsw-alias-markdown-placeholder: #0b1526 !important;
+  --dsw-alias-markdown-tag: #0e1b30 !important;
+  --dsw-alias-markdown-citation: #0f1d33 !important;
+  --dsw-alias-markdown-code-segment-selected: #14243f !important;
+  --dsw-alias-markdown-code-segment-unselected: #070c17 !important;
+  --dsw-alias-code-diff-added: #00ffa31f !important;
+  --dsw-alias-code-diff-deleted: #ff2d6f1f !important;
+  --dsw-alias-file-diff-added-bg: #06281d !important;
+  --dsw-alias-file-diff-added-gutter: #031810 !important;
+  --dsw-alias-file-diff-added-marker: #00ffa3 !important;
+  --dsw-alias-file-diff-deleted-bg: #330d1c !important;
+  --dsw-alias-file-diff-deleted-gutter: #1d060f !important;
+  --dsw-alias-file-diff-deleted-marker: #ff2d6f !important;
+
+  /* --- chrome surfaces --------------------------------------------------- */
+  --dsw-specific-sidebar-fill: #060a14 !important;
+  --dsw-specific-sidebar-nav-item-active: #0f2038 !important;
+  --dsw-specific-sidebar-nav-item-active-accent: #ff2d95 !important;
+  --dsw-specific-sidebar-nav-item-hover: #0b1729 !important;
+  --dsw-specific-bubble: #0d1b30 !important;
+  --dsw-specific-bubble-highlight: #123055 !important;
+  --dsw-specific-input-major: #0a1120 !important;
+  --dsw-specific-login-input: #0a1120 !important;
+  --dsw-specific-selector: #14243f !important;
+  --dsw-specific-tip: #16233c !important;
+  --dsw-specific-menu: #0a1424f0 !important;
+  --dsw-menu-surface-fill: #0a1424d9 !important;
+  --dsw-alias-menu-group-header-fill: #0e1c30f0 !important;
+  --dsw-alias-settings-card-fill: #0a1120 !important;
+  --dsw-alias-settings-card-stroke: #00e5ff2e !important;
+  --dsw-alias-tooltip-bg: #0b1a2e !important;
+  --dsw-alias-tooltip-key-bg: #16304a !important;
+  --dsw-alias-toast-bg: #0b1a2e !important;
+  --dsw-alias-toast-label: #d9f6ff !important;
+  --dsw-alias-turn-trigger-bg: #00e5ff14 !important;
+  --dsw-alias-turn-trigger-bg-hover: #00e5ff26 !important;
+  --dsw-alias-switch-thumb: #00e5ff !important;
+
+  /* --- scrollbars / focus ------------------------------------------------ */
+  --dsw-alias-scrollbar-bg-l1: #16394d !important;
+  --dsw-alias-scrollbar-bg-l2: #1d4f6b !important;
+  --dsw-alias-scrollbar-hover-l1: #00e5ff66 !important;
+  --dsw-alias-scrollbar-hover-l2: #00e5ff99 !important;
+  --dsw-focus-ring-color: #00e5ff !important;
+
+  /* --- statics referenced straight from component stylesheets -------------- */
+  --dsw-static-deepseek-400: #4df0ff !important;
+  --dsw-static-deepseek-450: #2fdcf7 !important;
+  --dsw-static-deepseek-500: #00e5ff !important;
+  --dsw-static-blue-400: #00d9ff !important;
+  --dsw-static-blue-450: #00c9f5 !important;
+  --dsw-static-blue-500: #00b8ff !important;
+  --dsw-static-green-500: #00ffa3 !important;
+  --dsw-static-amber-400: #ffd452 !important;
+  --dsw-static-amber-500: #ffc400 !important;
+  --dsw-static-red-600: #ff2d6f !important;
+  --dsw-static-neutral-bluish-00: #04060d !important;
+  --dsw-static-neutral-bluish-300: #9fd8e8 !important;
+
+  /* --- boot canvas ------------------------------------------------------- */
+  --dsh-boot-bg: #04060d !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 2. Canvas: grid, corner glows, neon rim, scanlines                          */
+/* -------------------------------------------------------------------------- */
+
+body {
+  background-color: #04060d !important;
+  background-image:
+    radial-gradient(1200px 680px at 8% -10%, rgba(0, 229, 255, 0.14), transparent 62%),
+    radial-gradient(1000px 620px at 96% 112%, rgba(255, 45, 149, 0.12), transparent 64%),
+    radial-gradient(760px 460px at 52% 42%, rgba(124, 77, 255, 0.07), transparent 70%) !important;
+  background-attachment: fixed !important;
+}
+
+/* neon rim line along the very top of the window */
+body::before {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 0 auto 0 !important;
+  height: 2px !important;
+  pointer-events: none !important;
+  z-index: 2147483001 !important;
+  background: linear-gradient(90deg, transparent 0%, #00e5ff 18%, #7c4dff 50%, #ff2d95 82%, transparent 100%) !important;
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.55) !important;
+}
+
+/* grid + scanline film over the whole surface */
+body::after {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 2147483000 !important;
+  background-image:
+    radial-gradient(1100px 620px at 4% -8%, rgba(0, 229, 255, 0.13), transparent 62%),
+    radial-gradient(900px 560px at 100% 106%, rgba(255, 45, 149, 0.12), transparent 64%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px),
+    linear-gradient(rgba(0, 229, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.09) 1px, transparent 1px) !important;
+  background-size: auto, auto, auto, 44px 44px, 44px 44px !important;
+  opacity: 0.75 !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 3. Accents                                                                  */
+/* -------------------------------------------------------------------------- */
+
+::selection {
+  background: rgba(255, 45, 149, 0.38) !important;
+  color: #eafcff !important;
+}
+
+:focus-visible {
+  outline-color: #00e5ff !important;
+}
+
+code,
+kbd,
+samp {
+  text-shadow: 0 0 14px rgba(0, 229, 255, 0.28) !important;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  text-shadow: 0 0 18px rgba(0, 229, 255, 0.22) !important;
+}
+
+pre {
+  border-color: rgba(0, 229, 255, 0.22) !important;
+}
+
+hr {
+  border-color: rgba(0, 229, 255, 0.22) !important;
+}

@@ -1,0 +1,6 @@
+# Bundle patch for @local/cyberpunk-theme.
+# Inserts the Host row that injects the cyberpunk stylesheet into the Web GUI.
+- insert:
+    - id: cyberpunk-theme
+      name: '@local/cyberpunk-theme'
+      config: {}

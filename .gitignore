@@ -1,0 +1,12 @@
+# local-only artifacts (not part of the published project)
+extract/
+preview/edge-profile/
+preview/_check.png
+preview/palette.css
+preview/demo.html
+tools/yaml/
+node_modules/
+*.log
+*.bak
+*.cookies
+pat.txt

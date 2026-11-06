@@ -1,0 +1,570 @@
+/* ============================================================================
+   Rocket launch → orbit transition overlay for the DeepSeek Harness Web GUI.
+   ----------------------------------------------------------------------------
+   Plays between the boot screen and the app UI:
+     pad → ignition → ascent → atmosphere → orbit → handover → reveal app
+   Pure CSS animation driven by one long keyframe timeline; the browser script
+   only flips data-phase attributes and writes telemetry text.
+   ========================================================================== */
+
+#rocket-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  overflow: hidden;
+  background: #03060f;
+  color: #d9f6ff;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  cursor: pointer;
+  user-select: none;
+  opacity: 1;
+  transition: opacity .75s ease;
+}
+
+#rocket-boot.rb-hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- layers --------------------------------------------------------------- */
+
+.rb-sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 80% at 50% 108%, rgba(0, 229, 255, .18), transparent 55%),
+    linear-gradient(180deg, #02040c 0%, #061028 45%, #0b1d46 78%, #123a6b 100%);
+  transition: background 1.4s ease, opacity 1.2s ease;
+}
+
+.rb-space {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background:
+    radial-gradient(60% 45% at 18% 24%, rgba(124, 77, 255, .22), transparent 62%),
+    radial-gradient(45% 38% at 82% 68%, rgba(255, 45, 149, .16), transparent 64%),
+    radial-gradient(70% 50% at 50% 110%, rgba(0, 229, 255, .12), transparent 60%),
+    #01030a;
+  transition: opacity 1.6s ease;
+}
+
+.rb-stars {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+  background-repeat: repeat;
+  background-image:
+    radial-gradient(1.4px 1.4px at 20px 30px, rgba(255, 255, 255, .95), transparent),
+    radial-gradient(1.2px 1.2px at 130px 80px, rgba(190, 240, 255, .85), transparent),
+    radial-gradient(1.6px 1.6px at 260px 40px, rgba(255, 255, 255, .8), transparent),
+    radial-gradient(1.1px 1.1px at 70px 190px, rgba(255, 214, 245, .8), transparent),
+    radial-gradient(1.3px 1.3px at 210px 150px, rgba(180, 255, 240, .75), transparent),
+    radial-gradient(1.2px 1.2px at 320px 210px, rgba(255, 255, 255, .7), transparent);
+  background-size: 380px 240px;
+  animation: rb-twinkle 4.5s ease-in-out infinite;
+}
+
+.rb-planet {
+  position: absolute;
+  left: 50%;
+  bottom: -74vh;
+  width: 150vh;
+  height: 150vh;
+  margin-left: -75vh;
+  border-radius: 50%;
+  opacity: 0;
+  transform: translateY(38vh);
+  transition: opacity 1.4s ease, transform 2.6s cubic-bezier(.3, .8, .3, 1);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0, 229, 255, .35), transparent 55%),
+    radial-gradient(circle at 30% 20%, rgba(0, 120, 190, .45), transparent 60%),
+    linear-gradient(180deg, #062043 0%, #03101f 60%, #01060d 100%);
+  box-shadow: 0 0 12vh rgba(0, 229, 255, .35), inset 0 3vh 8vh rgba(0, 229, 255, .18);
+}
+
+.rb-planet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-image:
+    radial-gradient(1.5px 1.5px at 30% 22%, rgba(255, 214, 120, .9), transparent),
+    radial-gradient(1.2px 1.2px at 42% 30%, rgba(255, 214, 120, .7), transparent),
+    radial-gradient(1.4px 1.4px at 55% 18%, rgba(255, 214, 120, .8), transparent),
+    radial-gradient(1.1px 1.1px at 64% 28%, rgba(255, 214, 120, .6), transparent),
+    radial-gradient(1.3px 1.3px at 24% 34%, rgba(255, 214, 120, .75), transparent);
+  background-size: 180px 120px;
+  opacity: .8;
+}
+
+.rb-horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 26vh;
+  background:
+    linear-gradient(180deg, transparent, rgba(3, 8, 20, .9) 40%, #02040c 100%);
+  transition: opacity 1.2s ease;
+}
+
+.rb-grid {
+  position: absolute;
+  left: -60%;
+  right: -60%;
+  bottom: -6vh;
+  height: 62vh;
+  perspective: 340px;
+  opacity: .8;
+  transition: opacity 1s ease;
+  background-image:
+    linear-gradient(rgba(0, 229, 255, .45) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, .35) 1px, transparent 1px);
+  background-size: 70px 70px;
+  transform: rotateX(76deg);
+  transform-origin: 50% 100%;
+  mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+  animation: rb-grid-run 1.1s linear infinite;
+}
+
+/* speed streaks that appear while the rocket climbs */
+.rb-speed {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .5s ease;
+  background-image: repeating-linear-gradient(180deg, transparent 0 46px, rgba(0, 229, 255, .16) 46px 47px);
+  background-size: 100% 120px;
+  animation: rb-speed-run .45s linear infinite;
+}
+
+#rocket-boot[data-phase="ascent"] .rb-speed { opacity: 1; }
+
+/* --- launch pad ----------------------------------------------------------- */
+
+.rb-pad {
+  position: absolute;
+  left: 50%;
+  bottom: 6vh;
+  width: 340px;
+  height: 120px;
+  margin-left: -170px;
+  transform-origin: 50% 100%;
+  transition: opacity .6s ease;
+}
+
+.rb-pad::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 150px;
+  height: 10px;
+  margin-left: -75px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, transparent, #00e5ff, transparent);
+  box-shadow: 0 0 26px rgba(0, 229, 255, .8);
+}
+
+.rb-tower {
+  position: absolute;
+  right: 34px;
+  bottom: 8px;
+  width: 8px;
+  height: 116px;
+  background: linear-gradient(180deg, #1b2740, #0a1120);
+  box-shadow: inset 0 0 0 1px rgba(0, 229, 255, .35);
+}
+
+.rb-tower::after {
+  content: "";
+  position: absolute;
+  left: -16px;
+  top: 8px;
+  width: 40px;
+  height: 6px;
+  background: rgba(0, 229, 255, .28);
+  box-shadow: 0 26px 0 rgba(0, 229, 255, .18), 0 52px 0 rgba(0, 229, 255, .12);
+}
+
+/* --- rocket --------------------------------------------------------------- */
+
+.rb-rocket {
+  position: absolute;
+  left: 50%;
+  bottom: 12vh;
+  width: 150px;
+  height: 275px;
+  margin-left: -75px;
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+}
+
+.rb-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 18px rgba(0, 229, 255, .35));
+}
+
+.rb-flame {
+  position: absolute;
+  left: 50%;
+  top: 74%;
+  width: 54px;
+  height: 150px;
+  margin-left: -27px;
+  transform-origin: 50% 0;
+  opacity: 0;
+  border-radius: 50% 50% 46% 46% / 18% 18% 82% 82%;
+  background:
+    radial-gradient(60% 60% at 50% 0%, #ffffff 0%, #7ef9ff 20%, #00e5ff 44%, rgba(255, 45, 149, .5) 74%, transparent 100%);
+  filter: blur(1.4px);
+  animation: rb-flame 120ms ease-in-out infinite alternate;
+}
+
+.rb-trail {
+  position: absolute;
+  left: 50%;
+  top: 80%;
+  width: 16px;
+  height: 0;
+  margin-left: -8px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(0, 229, 255, .9), rgba(0, 229, 255, 0) 88%);
+  filter: blur(3px);
+  opacity: 0;
+}
+
+#rocket-boot[data-phase="ascent"] .rb-trail,
+#rocket-boot[data-phase="orbit"] .rb-trail {
+  opacity: .9;
+  height: 46vh;
+  animation: rb-trail-fade 6s linear forwards;
+}
+
+.rb-smoke {
+  position: absolute;
+  left: 50%;
+  bottom: 1vh;
+  width: 560px;
+  height: 260px;
+  margin-left: -280px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rb-smoke i {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 170px;
+  height: 170px;
+  margin-left: -85px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(190, 225, 255, .22) 0%, rgba(120, 165, 215, .1) 45%, transparent 70%);
+  filter: blur(18px);
+  animation: rb-smoke 2.1s ease-out infinite;
+}
+
+.rb-smoke i:nth-child(1) { margin-left: -150px; bottom: -10px; animation-delay: 0s; }
+.rb-smoke i:nth-child(2) { margin-left: -90px; bottom: 6px; animation-delay: .35s; }
+.rb-smoke i:nth-child(3) { margin-left: -25px; bottom: -4px; animation-delay: .7s; }
+.rb-smoke i:nth-child(4) { margin-left: 45px; bottom: 8px; animation-delay: 1.05s; }
+.rb-smoke i:nth-child(5) { margin-left: 110px; bottom: -8px; animation-delay: 1.4s; }
+
+/* --- HUD ------------------------------------------------------------------ */
+
+.rb-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+
+.rb-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 14px 22px;
+  font-size: 12px;
+  letter-spacing: .22em;
+  color: rgba(159, 216, 230, .85);
+  border-bottom: 1px solid rgba(0, 229, 255, .18);
+  background: linear-gradient(180deg, rgba(3, 8, 20, .8), transparent);
+}
+
+.rb-blink {
+  color: #ff2d95;
+  animation: rb-blink 1.1s steps(2, end) infinite;
+}
+
+.rb-clock {
+  margin-left: auto;
+}
+
+.rb-count {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(72px, 13vw, 190px);
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #fff;
+  text-shadow: 0 0 26px rgba(0, 229, 255, .85), 0 0 70px rgba(0, 229, 255, .45);
+  opacity: 0;
+}
+
+.rb-count.rb-show {
+  animation: rb-count-pop .55s ease-out forwards;
+}
+
+.rb-count.rb-ignite {
+  font-size: clamp(56px, 10vw, 150px);
+  color: #ffd166;
+  text-shadow: 0 0 30px rgba(255, 209, 102, .9), 0 0 90px rgba(255, 45, 149, .5);
+  animation: rb-count-pop .5s ease-out forwards, rb-shake .5s ease-in-out infinite;
+}
+
+.rb-telemetry {
+  position: absolute;
+  left: 26px;
+  bottom: 26px;
+  display: grid;
+  gap: 6px;
+  font-size: 12.5px;
+  letter-spacing: .1em;
+  color: rgba(159, 216, 230, .9);
+}
+
+.rb-telemetry b {
+  color: #00e5ff;
+  font-weight: 600;
+  min-width: 74px;
+  display: inline-block;
+}
+
+.rb-log {
+  position: absolute;
+  right: 40px;
+  bottom: 40px;
+  width: 360px;
+  text-align: right;
+  font-size: 12px;
+  line-height: 1.75;
+  color: rgba(159, 216, 230, .8);
+}
+
+.rb-log div {
+  opacity: 0;
+  animation: rb-line .4s ease-out forwards;
+}
+
+.rb-log .rb-ok { color: #00ffa3; }
+.rb-log .rb-hi { color: #00e5ff; }
+
+.rb-title {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  opacity: 0;
+}
+
+.rb-title.rb-show {
+  animation: rb-title-in 1s cubic-bezier(.2, .9, .2, 1) forwards;
+}
+
+.rb-title b {
+  display: block;
+  font-size: clamp(30px, 5vw, 66px);
+  letter-spacing: .16em;
+  color: #fff;
+  text-shadow: 0 0 28px rgba(0, 229, 255, .9), 0 0 80px rgba(255, 45, 149, .45);
+}
+
+.rb-title span {
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+  letter-spacing: .4em;
+  color: rgba(159, 216, 230, .85);
+}
+
+.rb-corner {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  border: 2px solid rgba(0, 229, 255, .55);
+}
+
+.rb-corner.tl { top: 54px; left: 22px; border-right: 0; border-bottom: 0; }
+.rb-corner.tr { top: 54px; right: 22px; border-left: 0; border-bottom: 0; }
+.rb-corner.bl { bottom: 22px; left: 22px; border-right: 0; border-top: 0; }
+.rb-corner.br { bottom: 22px; right: 22px; border-left: 0; border-top: 0; }
+
+.rb-skip {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  font-size: 11.5px;
+  letter-spacing: .24em;
+  color: rgba(159, 216, 230, .55);
+  animation: rb-blink 2.4s ease-in-out infinite;
+}
+
+.rb-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 42%, rgba(1, 3, 10, .85) 100%);
+}
+
+.rb-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .35;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .3) 0 1px, transparent 1px 3px);
+  mix-blend-mode: multiply;
+}
+
+.rb-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle at 50% 55%, #ffffff 0%, rgba(190, 245, 255, .75) 26%, rgba(0, 229, 255, 0) 62%);
+}
+
+/* --- phase driven states --------------------------------------------------- */
+
+#rocket-boot[data-phase="ignite"] .rb-flame { opacity: 1; }
+#rocket-boot[data-phase="ignite"] .rb-smoke { opacity: 1; }
+#rocket-boot[data-phase="ascent"] .rb-flame { opacity: 1; }
+#rocket-boot[data-phase="ascent"] .rb-smoke { opacity: .55; }
+#rocket-boot[data-phase="orbit"] .rb-smoke { opacity: 0; }
+#rocket-boot[data-phase="ascent"] .rb-pad { opacity: .25; }
+#rocket-boot[data-phase="orbit"] .rb-space { opacity: 1; }
+#rocket-boot[data-phase="orbit"] .rb-stars { opacity: 1; }
+#rocket-boot[data-phase="orbit"] .rb-planet { opacity: 1; transform: translateY(0); }
+#rocket-boot[data-phase="orbit"] .rb-sky { opacity: .25; }
+#rocket-boot[data-phase="orbit"] .rb-horizon { opacity: 0; }
+#rocket-boot[data-phase="orbit"] .rb-grid { opacity: 0; }
+#rocket-boot[data-phase="orbit"] .rb-pad { opacity: 0; }
+
+/* --- keyframes ------------------------------------------------------------- */
+
+/* One timeline for the whole flight: pad → ignition → ascent → orbit → exit. */
+.rb-rocket {
+  animation: rb-flight 6s cubic-bezier(.32, 0, .18, 1) forwards;
+}
+
+@keyframes rb-flight {
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  12% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  14% { transform: translate3d(0, -6px, 0) scale(1); opacity: 1; }
+  20% { transform: translate3d(0, -54px, 0) scale(.98); opacity: 1; }
+  35% { transform: translate3d(0, -30vh, 0) scale(.8); opacity: 1; }
+  50% { transform: translate3d(0, -54vh, 0) scale(.56); opacity: 1; }
+  60% { transform: translate3d(0, -68vh, 0) scale(.36); opacity: 1; }
+  70% { transform: translate3d(0, -74vh, 0) scale(.24); opacity: 1; }
+  82% { transform: translate3d(-13vw, -84vh, 0) scale(.12); opacity: 1; }
+  92% { transform: translate3d(-33vw, -98vh, 0) scale(.05); opacity: .9; }
+  100% { transform: translate3d(-46vw, -112vh, 0) scale(.01); opacity: 0; }
+}
+
+@keyframes rb-trail-fade {
+  0% { height: 8vh; opacity: .9; }
+  60% { height: 30vh; opacity: .7; }
+  100% { height: 4vh; opacity: 0; }
+}
+
+@keyframes rb-speed-run {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 120px; }
+}
+
+@keyframes rb-flame {
+  0% { transform: scaleY(.82) scaleX(.94); filter: blur(1.6px) brightness(1); }
+  100% { transform: scaleY(1.14) scaleX(1.04); filter: blur(.8px) brightness(1.25); }
+}
+
+@keyframes rb-smoke {
+  0% { transform: translate(-50%, 0) scale(.5); opacity: 0; }
+  25% { opacity: .8; }
+  100% { transform: translate(-50%, -90px) scale(2.4); opacity: 0; }
+}
+
+@keyframes rb-grid-run {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 70px; }
+}
+
+@keyframes rb-twinkle {
+  0%, 100% { opacity: .75; }
+  50% { opacity: 1; }
+}
+
+@keyframes rb-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .25; }
+}
+
+@keyframes rb-count-pop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); filter: blur(6px); }
+  60% { opacity: 1; transform: translate(-50%, -50%) scale(.96); filter: blur(0); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes rb-title-in {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.86); filter: blur(10px); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
+}
+
+@keyframes rb-line {
+  0% { opacity: 0; transform: translateX(14px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes rb-shake {
+  0%, 100% { margin-left: 0; }
+  25% { margin-left: -4px; }
+  75% { margin-left: 4px; }
+}
+
+@keyframes rb-flash {
+  0% { opacity: 0; }
+  12% { opacity: .95; }
+  100% { opacity: 0; }
+}
+
+@keyframes rb-auto-hide {
+  0%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Ignition flash + camera shake */
+#rocket-boot.rb-boom .rb-flash { animation: rb-flash .8s ease-out; }
+#rocket-boot.rb-boom .rb-rocket { animation: rb-flight 6s cubic-bezier(.32, 0, .18, 1) forwards, rb-shake .18s ease-in-out 4; }
+#rocket-boot.rb-boom .rb-pad { animation: rb-shake .18s ease-in-out 4; }
+
+/* Safety net: if the script never runs, the overlay still fades away on its own. */
+#rocket-boot.rb-auto {
+  animation: rb-auto-hide .9s ease 9s forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #rocket-boot { display: none; }
+}

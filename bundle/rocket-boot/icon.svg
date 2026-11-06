@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Rocket launch transition">
+  <defs>
+    <linearGradient id="rb-icon-flame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="45%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#ff2d95" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rb-icon-body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#16233c"/>
+      <stop offset="45%" stop-color="#e6f2ff"/>
+      <stop offset="100%" stop-color="#26364f"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="#05070f" stroke="#00e5ff" stroke-width="2"/>
+  <path d="M32 8 C42 20 45 30 45 40 L45 46 L19 46 L19 40 C19 30 22 20 32 8 Z" fill="url(#rb-icon-body)"/>
+  <path d="M32 8 C37 15 40 22 41 28 L32 32 L23 28 C24 22 27 15 32 8 Z" fill="#00e5ff" opacity=".85"/>
+  <path d="M19 38 L11 52 L19 48 Z" fill="#ff2d95"/>
+  <path d="M45 38 L53 52 L45 48 Z" fill="#ff2d95"/>
+  <circle cx="32" cy="36" r="4.5" fill="#04121b" stroke="#00e5ff" stroke-width="2"/>
+  <path d="M27 46 L37 46 L34 56 L30 56 Z" fill="url(#rb-icon-flame)"/>
+</svg>

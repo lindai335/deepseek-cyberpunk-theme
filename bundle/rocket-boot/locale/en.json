@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Rocket Launch Transition",
+    "description": "Plays a rocket launch into orbit animation between the Harness boot screen and the app UI."
+  }
+}
